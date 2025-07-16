@@ -42,14 +42,12 @@ export const createPost = async (req, res, next) => {
 
 export const getUserPosts = async (req, res, next) => { 
     try {
-        const userId = req.params.id
         const page = parseInt(req.query.page) || 1
         const limit = parseInt(req.query.limit) || 10
         const skip = (page - 1) * limit
-    
         const [items, total] = await Promise.all([
-         Post.find({ author:userId }).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('author', 'name email'),
-          Post.countDocuments()
+         Post.find({ author:req.user.id }).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('author', 'name email'),
+         Post.countDocuments({ author: req.user.id })
         ])
     
         res.json({ page, totalPages: Math.ceil(total / limit), totalItems: total, items })
