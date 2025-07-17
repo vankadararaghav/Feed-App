@@ -19,6 +19,13 @@ app.use(morgan("dev"));
 app.use("/auth", authRoutes);
 app.use("/posts", postRoutes);
 
+app.all("*", (req, res, next) => { 
+    return res.status(404).send({
+        message: 'Route not found',
+        errorCode: '404'
+    })
+})
+
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
