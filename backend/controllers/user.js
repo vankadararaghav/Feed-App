@@ -3,7 +3,8 @@ import User from '../models/user.js'
 import bcrypt from 'bcryptjs'
 import { RecordAlreadyExistsError, RecordNotFoundError, UnauthorizedError, ValidationError } from '../lib/errors.js'
 
-const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' })
+const generateRefreshToken = (id) => jwt.sign({ id }, process.env.JWT_REFRESH_TOKEN_SECRET, { expiresIn: '7d' })
+const generateAccessToken = (id) => jwt.sign({ id }, process.env.JWT_ACCESS_TOKEN_SECRET, { expiresIn: '15m' })
 
 export const registerUser = async (req, res, next) => {
   try {
@@ -13,8 +14,9 @@ export const registerUser = async (req, res, next) => {
     if (existing) throw new RecordAlreadyExistsError('User already registered')
     password = await bcrypt.hash(password, 12)
     const user = await User.create({ name, email, password })
-    const token = generateToken(user._id)
-    res.status(201).json({ token, id: user._id })
+    const refreshToken = generateRefreshToken(user._id)
+    const accessToken = generateAccessToken(user._id)
+    res.status(201).json({ refreshToken, accessToken, id: user._id })
   } catch (err) {
     next(err)
   }
@@ -28,8 +30,9 @@ export const loginUser = async (req, res, next) => {
     if (!user) throw new RecordNotFoundError('User not found')
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) throw new UnauthorizedError('Invalid credentials')
-    const token = generateToken(user._id)
-    res.status(201).json({ token, id: user._id })
+    const refreshToken = generateRefreshToken(user._id)
+    const accessToken = generateAccessToken(user._id)
+    res.status(200).json({ refreshToken, accessToken, id: user._id })
   } catch (err) {
     next(err)
   }
