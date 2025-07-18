@@ -4,9 +4,9 @@ import auth from '../middlewares/auth.js'
 
 const router = express.Router()
 
-router.get('/userPosts', auth, getUserPosts)
+router.get('/userPosts', auth, getUserPosts)  // More specific first
 router.get('/', auth, getPosts)
-router.get('/:id', auth, getPostById)
 router.post('/', auth, createPost)
+router.get('/:id', auth, getPostById)  
 
 export default router
